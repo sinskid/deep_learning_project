@@ -1,0 +1,12 @@
+torch
+torchvision
+timm
+datasets
+matplotlib
+scikit-learn
+ipykernel
+ipython
+jupyterlab
+ipywidgets
+matplotlib
+PIL
