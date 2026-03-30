@@ -2,11 +2,10 @@ from datasets import load_dataset
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms as T
 from PIL import ImageDraw
-import torch
 import random
 
 # --- Masque centré avec pourcentage ---
-def apply_center_mask(image, percent=0.2):
+def apply_center_mask(image, percent):
     """
     Applique un carré noir centré sur l'image.
     percent : proportion du plus petit côté à masquer (0.0 - 1.0)
@@ -25,19 +24,19 @@ def apply_center_mask(image, percent=0.2):
     draw.rectangle([x0, y0, x1, y1], fill=(0,0,0))
     return img
 
-# --- Transformations de base ---
+# --- Transformations de base : image 224x224 pour vit et cnn , inconvenients -> étire les images ---
 base_transform = T.Compose([
     T.Resize(256),
     T.CenterCrop(224),
     T.ToTensor()
 ])
 
-# --- Classe Dataset augmentée ---
+# --- Classe Dataset augmentée : permet d'appliquer plusieurs effets pour mesurer la différence de performance entre les modèles ---
 class AugmentedDataset(Dataset):
     def __init__(self, hf_dataset, base_transform=None, effects=None):
         """
         hf_dataset : Hugging Face dataset
-        effects : liste d'effets à appliquer ('mask', 'blur', 'rotate', 'color')
+        effects : liste d'effets à appliquer ('mask', 'blur', 'color')
         base_transform : transformations de base (resize, crop, to tensor)
         effect_parameters : dictionnaire des paramètres pour chaque effet
         """
@@ -69,22 +68,29 @@ class AugmentedDataset(Dataset):
 
         return image, label
 
-base_transform = T.Compose([
-    T.Resize(256),
-    T.CenterCrop(224),
-    T.ToTensor()
-])
-
-
-def load_data(batch_size=32,num_workers=2, effects = None, effects_parameters = None):
+def load_testdata(batch_size=32,num_workers=2, effects = None):
     
+    # dataset Hugging Face 
     dataset = load_dataset("blanchon/EuroSAT_RGB")
     
-    dataset_train = AugmentedDataset(dataset['train'], base_transform=base_transform)
+    # test dataset
     dataset_test = AugmentedDataset(dataset['test'], base_transform=base_transform, effects=effects)
 
-    train_loader = DataLoader(dataset_train, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+    # test dataloader
     test_loader = DataLoader(dataset_test, batch_size=batch_size, num_workers=num_workers)
     
-    return train_loader, test_loader
+    return test_loader
+
+def load_traindata(batch_size=32,num_workers=2):
+    
+    # dataset Hugging Face
+    dataset = load_dataset("blanchon/EuroSAT_RGB")
+    
+    # train dataset 
+    dataset_train = AugmentedDataset(dataset['train'], base_transform=base_transform)
+
+    # train dataloader
+    train_loader = DataLoader(dataset_train, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+    
+    return train_loader
 
