@@ -4,6 +4,20 @@ from torchvision import transforms as T
 from PIL import ImageDraw
 import random
 
+# Transformations de base : image 224x224 pour vit et cnn , inconvenients -> étire les images 
+# Parametres de normalisation différents pour ViT et CNN (ImageNet)
+vit_base_transform = T.Compose([
+    T.Resize((224, 224)),
+    T.ToTensor(),
+    T.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+
+])
+cnn_base_transform = T.Compose([
+    T.Resize((224, 224)),
+    T.ToTensor(),
+    T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+])
+
 # --- Masque centré avec pourcentage ---
 def apply_center_mask(image, percent):
     """
@@ -23,13 +37,6 @@ def apply_center_mask(image, percent):
     draw = ImageDraw.Draw(img)
     draw.rectangle([x0, y0, x1, y1], fill=(0,0,0))
     return img
-
-# --- Transformations de base : image 224x224 pour vit et cnn , inconvenients -> étire les images ---
-base_transform = T.Compose([
-    T.Resize(256),
-    T.CenterCrop(224),
-    T.ToTensor()
-])
 
 # --- Classe Dataset augmentée : permet d'appliquer plusieurs effets pour mesurer la différence de performance entre les modèles ---
 class AugmentedDataset(Dataset):
@@ -68,10 +75,17 @@ class AugmentedDataset(Dataset):
 
         return image, label
 
-def load_testdata(batch_size=32,num_workers=2, effects = None):
+def load_testdata(batch_size=32,num_workers=2, model_name = None, effects = None):
     
     # dataset Hugging Face 
     dataset = load_dataset("blanchon/EuroSAT_RGB")
+    
+    if model_name == "vit":
+        base_transform = vit_base_transform
+    elif model_name == "cnn":
+        base_transform = cnn_base_transform
+    else:
+        raise ValueError("model_name must be 'vit' or 'cnn'")
     
     # test dataset
     dataset_test = AugmentedDataset(dataset['test'], base_transform=base_transform, effects=effects)
@@ -81,10 +95,17 @@ def load_testdata(batch_size=32,num_workers=2, effects = None):
     
     return test_loader
 
-def load_traindata(batch_size=32,num_workers=2):
+def load_traindata(batch_size=32,num_workers=2, model_name = None):
     
     # dataset Hugging Face
     dataset = load_dataset("blanchon/EuroSAT_RGB")
+    
+    if model_name == "vit":
+        base_transform = vit_base_transform
+    elif model_name == "cnn":
+        base_transform = cnn_base_transform
+    else:   
+        raise ValueError("model_name must be 'vit' or 'cnn'")
     
     # train dataset 
     dataset_train = AugmentedDataset(dataset['train'], base_transform=base_transform)
