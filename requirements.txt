@@ -9,4 +9,4 @@ ipython
 jupyterlab
 ipywidgets
 matplotlib
-PIL
+pillow
