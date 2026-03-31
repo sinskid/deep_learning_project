@@ -1,8 +1,10 @@
 from datasets import load_dataset
+from matplotlib import image
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms as T
-from PIL import ImageDraw
-import random
+from PIL import ImageDraw, Image, ImageFilter
+import torch
+
 
 # Transformations de base : image 224x224 pour vit et cnn , inconvenients -> étire les images 
 # Parametres de normalisation différents pour ViT et CNN (ImageNet)
@@ -17,26 +19,6 @@ cnn_base_transform = T.Compose([
     T.ToTensor(),
     T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
-
-# --- Masque centré avec pourcentage ---
-def apply_center_mask(image, percent):
-    """
-    Applique un carré noir centré sur l'image.
-    percent : proportion du plus petit côté à masquer (0.0 - 1.0)
-    """
-    img = image.copy()
-    w, h = img.size
-    mask_size = int(min(w, h) * percent)
-
-    # Coordonnées du carré centré
-    x0 = (w - mask_size) // 2
-    y0 = (h - mask_size) // 2
-    x1 = x0 + mask_size
-    y1 = y0 + mask_size
-
-    draw = ImageDraw.Draw(img)
-    draw.rectangle([x0, y0, x1, y1], fill=(0,0,0))
-    return img
 
 # --- Classe Dataset augmentée : permet d'appliquer plusieurs effets pour mesurer la différence de performance entre les modèles ---
 class AugmentedDataset(Dataset):
@@ -59,23 +41,17 @@ class AugmentedDataset(Dataset):
         image = self.dataset[idx]['image']
         label = self.dataset[idx]['label']
 
-        # --- Appliquer les effets ---
-        for key, params in self.effects.items():
-            if key == 'mask':
-                image = apply_center_mask(image, percent=params)
-            elif key == 'blur':
-                image = image.filter(T.GaussianBlur(radius=params))
-            elif key == 'color':
-                factor = random.uniform(0.8, 1.2)
-                image = T.functional.adjust_brightness(image, factor)
-        
-        # --- Transformations de base ---
-        if self.base_transform:
-            image = self.base_transform(image)
-
+        for key, param in self.effects.items():
+            if key == 'center_mask':
+                image = apply_center_mask(image, param)
+            elif key == 'random_mask':
+                image = apply_random_mask(image, param)
+            elif key == 'gaussian_blur':
+                image = apply_blur(image, param)
+        image = self.base_transform(image)
         return image, label
 
-def load_testdata(batch_size=32,num_workers=2, model_name = None, effects = None):
+def load_data(batch_size=32, num_workers=2, data_type=None, model_name = None, effects=None):
     
     # dataset Hugging Face 
     dataset = load_dataset("blanchon/EuroSAT_RGB")
@@ -85,33 +61,58 @@ def load_testdata(batch_size=32,num_workers=2, model_name = None, effects = None
     elif model_name == "cnn":
         base_transform = cnn_base_transform
     else:
-        raise ValueError("model_name must be 'vit' or 'cnn'")
+        base_transform = None
     
     # test dataset
-    dataset_test = AugmentedDataset(dataset['test'], base_transform=base_transform, effects=effects)
+    dataset = AugmentedDataset(dataset[data_type], base_transform=base_transform, effects=effects)
 
     # test dataloader
-    test_loader = DataLoader(dataset_test, batch_size=batch_size, num_workers=num_workers)
+    dataloader = DataLoader(dataset, batch_size=batch_size, num_workers=num_workers)
     
-    return test_loader
+    return dataloader
 
-def load_traindata(batch_size=32,num_workers=2, model_name = None):
-    
-    # dataset Hugging Face
-    dataset = load_dataset("blanchon/EuroSAT_RGB")
-    
-    if model_name == "vit":
-        base_transform = vit_base_transform
-    elif model_name == "cnn":
-        base_transform = cnn_base_transform
-    else:   
-        raise ValueError("model_name must be 'vit' or 'cnn'")
-    
-    # train dataset 
-    dataset_train = AugmentedDataset(dataset['train'], base_transform=base_transform)
+# --- Fonctions d'effets sur les images ---
 
-    # train dataloader
-    train_loader = DataLoader(dataset_train, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+# --- Masque centré sur PIL.Image ---
+def apply_center_mask(image, percent):
+    """
+    image : PIL.Image
+    percent : fraction du plus petit côté à masquer
+    """
+    img = image.copy()  # pour ne pas modifier l'original
+    W, H = img.size
+    mask_size = int(min(W, H) * percent)
     
-    return train_loader
+    x0 = (W - mask_size) // 2
+    y0 = (H - mask_size) // 2
+    
+    draw = ImageDraw.Draw(img)
+    draw.rectangle([x0, y0, x0 + mask_size, y0 + mask_size], fill=(0, 0, 0))
+    
+    return img
 
+# --- Masque aléatoire sur PIL.Image ---
+def apply_random_mask(image, percent):
+    """
+    image : PIL.Image
+    percent : fraction de pixels à masquer
+    """
+    img = image.copy()
+    W, H = img.size
+    
+    # Créer un masque binaire aléatoire H x W
+    mask = (torch.rand(H, W) > percent).numpy().astype('uint8') * 255
+    
+    # Convertir en image binaire et appliquer sur chaque canal
+    mask_img = Image.fromarray(mask, mode='L')
+    if img.mode != 'RGB':
+        img = img.convert('RGB')
+    r, g, b = img.split()
+    r = Image.composite(r, mask_img.point(lambda x: 0), mask_img)
+    g = Image.composite(g, mask_img.point(lambda x: 0), mask_img)
+    b = Image.composite(b, mask_img.point(lambda x: 0), mask_img)
+    
+    return Image.merge('RGB', (r, g, b))
+
+def apply_blur(image, radius):
+    return image.filter(ImageFilter.GaussianBlur(radius))
