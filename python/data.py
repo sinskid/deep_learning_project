@@ -114,5 +114,7 @@ def apply_random_mask(image, percent):
     
     return Image.merge('RGB', (r, g, b))
 
+# --- Flou gaussien sur PIL.Image ---
 def apply_blur(image, radius):
     return image.filter(ImageFilter.GaussianBlur(radius))
+

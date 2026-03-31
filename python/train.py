@@ -5,7 +5,6 @@ import torch
 
 def train(model, train_dataloader, test_dataloader, optimizer, loss_function, device):
 
-
     # Train the model
     model.train()
     train_loss = 0

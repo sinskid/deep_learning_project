@@ -1,5 +1,6 @@
 import os
 import torch
+
 # Gere la création des dossiers pour les modèles et les logs 
 
 def setup_dirs():
