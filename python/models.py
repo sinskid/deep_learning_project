@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch
 from python.data import vit_base_transform, cnn_base_transform
 
+### MODELES ET FONCTIONS D'EVALUATIONS
 
 def get_cnn(num_classes=10):
     model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)

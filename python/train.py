@@ -1,5 +1,7 @@
 import torch
 
+### TRAINING
+
 # Fonction de training pour un epoch 
 # Avec évaluation sur le test set à la fin de l'epoch pour permettre l'early stopping
 

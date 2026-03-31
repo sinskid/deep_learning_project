@@ -2,8 +2,25 @@ import os
 import torch
 import matplotlib.pyplot as plt
 import numpy as np
-# Gere la création des dossiers pour les modèles et les logs 
+from collections import defaultdict
 
+### FONCTIONS UTILES
+
+# Dictionnaire pour convertir les labels en noms de classes
+labels_to_names = {
+    0: "AnnualCrop",
+    1: "Forest",
+    2: "HerbaceousVegetation",
+    3: "Highway",
+    4: "Industrial",
+    5: "Pasture",
+    6: "PermanentCrop",
+    7: "Residential",
+    8: "River",
+    9: "SeaLake"
+}
+
+# Gere la création des dossiers pour les modèles et les logs 
 def setup_dirs():
     project_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
@@ -19,10 +36,7 @@ def setup_dirs():
 
     return paths
 
-import matplotlib.pyplot as plt
-import numpy as np
-from collections import defaultdict
-
+# Affiche k images par classe du dataset, avec les titres correspondants
 def show_nb_images_per_label(dataset, class_names, nb_images=2, save_path=None):
     
     label_images = defaultdict(list)
@@ -41,7 +55,7 @@ def show_nb_images_per_label(dataset, class_names, nb_images=2, save_path=None):
 
     fig, axes = plt.subplots(nb_images, num_labels, figsize=(3*num_labels, 3*nb_images))
     
-    # 🔥 Toujours forcer axes en 2D
+    # Toujours forcer axes en 2D
     axes = np.array(axes).reshape(nb_images, num_labels)
 
     for i, (label, imgs) in enumerate(label_images.items()):
@@ -61,17 +75,3 @@ def show_nb_images_per_label(dataset, class_names, nb_images=2, save_path=None):
         plt.savefig(save_path)
 
     plt.show()
-
-
-labels_to_names = {
-    0: "AnnualCrop",
-    1: "Forest",
-    2: "HerbaceousVegetation",
-    3: "Highway",
-    4: "Industrial",
-    5: "Pasture",
-    6: "PermanentCrop",
-    7: "Residential",
-    8: "River",
-    9: "SeaLake"
-}

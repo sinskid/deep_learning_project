@@ -5,6 +5,7 @@ from torchvision import transforms as T
 from PIL import ImageDraw, Image, ImageFilter
 import torch
 
+### MANIPULATION DES DONNEES ET TRANSFORMATIONS IMAGES
 
 # Transformations de base : image 224x224 pour vit et cnn , inconvenients -> étire les images 
 # Parametres de normalisation différents pour ViT et CNN (ImageNet)
