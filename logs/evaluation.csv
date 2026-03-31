@@ -1,0 +1,5 @@
+dataset,cnn,vit
+20_center_masked,0.968,0.886
+50_center_masked,0.641,0.505
+80_center_masked,0.113,0.115
+20_random_masked,0.113,0.200

@@ -1,9 +1,7 @@
 outputs/
-*.pth
 __pycache__/
 venv/
 *.log
-*.csv
 *.json
 *.h5
 *.ipynb_checkpoints
