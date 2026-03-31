@@ -1,0 +1,58 @@
+\documentclass{article}
+\sloppy
+\usepackage{float}
+\usepackage{graphicx} % Required for inserting images
+\usepackage[T1]{fontenc}      % Encodage des fontes
+\usepackage[utf8]{inputenc}   % Encodage UTF-8
+\usepackage[french]{babel}    % Langue française
+
+\title{Deep Learning Project}
+\author{Tom Garcia Thomas d'Arc}
+\date{March 2026}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction : choix du sujet, références}
+J'ai choisi de travailler sur la comparaison de deux légers modèles de classification d'images: 
+resnet18, un CNN, et vit-tiny-patch16-224, un Vision Transformer. 
+Ils sont tous les deux pré-entrainés sur ImageNet1K (https://huggingface.co/datasets/ILSVRC/imagenet-1k) une base de données largement utilisée.
+On les dénommera respectivement CNN et ViT dans la suite du rapport. \\
+
+Contrairement à la ressource communiquée dans le sujet du projet, je ne me suis pas basé sur le papier Lu and al. (2022) qui présente enfait une architecture de Vision Transformer Hybride assez poussée ce qui aurait probablement nuit à une comparaison stricte et pure entre les deux types de modèles.
+On se basera plutôt sur les articles originaux de chacun des modèles :
+\begin{itemize}
+    \item ResNet : Krizhevsky and al. (2012). ImageNet classification with deep convolutional neural networks.\footnote{Le modèle resnet utilise une architecture qui introduit en plus des CNN originaux des connexions résiduelles (skip connections)}
+    \item ViT : Dosovitskiy and al. (2020). An image is worth 16x16 words: Transformers for image recognition at scale. \\
+\end{itemize} 
+
+Après une étude et une compréhension (relative) du fonctionnement d'un CNN et d'un ViT, on peut faire les hypothèses suivantes sur les différences de performances entre les deux modèles :
+\begin{itemize}
+    \item (H1) Le CNN permet de capturer beaucoup de caractéristiques locales dans les images grâce à ses couches de convolution => il devrait être plus performant sur des motifs répétitifs et textures localement similaires.
+    \item (H2) Le ViT permet de capturer des relations globales dans les images grâce à son mécanisme d'attention => il devrait être plus performant sur des motifs qui nécessitent une compréhension globale de l'image mais aussi donc être plus robuste aux variations de textures.
+\\
+\end{itemize}
+
+On peut donc construire des datasets artificiels pour tester ces hypothèses. \\
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+Modèle & NB de paramètres & Size (MB) & Data de pré-entraînement & Accuracy@5 \\
+\hline
+ResNet18 & 11,6M & 45 & ImageNet1K & 85\% \\
+ViT-tiny-patch16-224 & 5,7M & 23 & ImageNet1K & Non-fournie \\
+\hline
+\end{tabular}
+\caption{Caractéristiques des modèles utilisés, ViT est plus léger mais les deux modèles ont même ordre de grandeur de paramètres et de taille.} %ajouter des références
+\end{table}
+
+\section{Datasets et Méthodologie}
+
+\section{Métriques et Résultats}
+
+\section{Améliorations possibles}
+
+\end{document}
