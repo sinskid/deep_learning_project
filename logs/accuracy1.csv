@@ -1,0 +1,11 @@
+dataset,cnn,vit
+no effect,0.981,0.975
+20_center_masked,0.968,0.886
+50_center_masked,0.641,0.505
+80_center_masked,0.113,0.115
+10_random_masked,0.113,0.286
+15_random_masked,0.113,0.216
+20_random_masked,0.113,0.199
+0.5_gaussian_blur,0.972,0.972
+1_gaussian_blur,0.742,0.808
+3_gaussian_blur,0.160,0.345

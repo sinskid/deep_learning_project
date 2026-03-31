@@ -1,0 +1,11 @@
+class,cnn,vit
+AnnualCrop,0.997,1.000
+Forest,0.985,0.982
+HerbaceousVegetation,0.382,0.942
+Highway,0.419,0.454
+Industrial,1.000,0.870
+Pasture,0.131,0.773
+PermanentCrop,0.870,0.942
+Residential,0.830,0.964
+River,0.836,0.832
+SeaLake,1.000,0.964
