@@ -9,3 +9,6 @@ venv/
 *.egg-info/
 .vscode/
 *.pyc
+*.tex
+*.gz
+*.aux
