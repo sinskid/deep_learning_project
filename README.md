@@ -3,7 +3,7 @@ Comparer la performance en classification d’images des CNNs (Krizhevsky et al.
 
 deep_learning_project/
 |
-+-- rapport.pdf
++-- main.pdf
 +-- python/
 | +-- data.py
 | +-- models.py
