@@ -12,3 +12,4 @@ venv/
 *.tex
 *.gz
 *.aux
+*.out
